@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchData } from '../services/api.ts';
-import { formatData } from '../services/geminiService.go';
+import { formatData } from '../services/api.ts';
 
 const DashboardPage: React.FC = () => {
     const [data, setData] = useState<string[]>([]);

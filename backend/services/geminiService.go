@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 )
 
-const geminiAPIURL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateText"
+const geminiAPIURL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 type GeminiRequest struct {
 	Contents []GeminiContent `json:"contents"`
@@ -35,10 +36,11 @@ type GeminiResponse struct {
 func FormatDataWithGemini(inputText, formatType string) (string, error) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
-		return "", fmt.Errorf("Gemini API key is missing")
+		return "", fmt.Errorf("gemini API key is missing")
 	}
 
 	prompt := fmt.Sprintf("Format this data as %s: %s", formatType, inputText)
+	log.Println("Sending Prompt:", prompt)
 
 	requestBody := GeminiRequest{
 		Contents: []GeminiContent{
@@ -77,6 +79,8 @@ func FormatDataWithGemini(inputText, formatType string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	log.Println("Gemini API Response:", string(body))
 
 	var geminiResponse GeminiResponse
 	err = json.Unmarshal(body, &geminiResponse)

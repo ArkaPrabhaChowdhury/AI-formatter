@@ -1,23 +1,21 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 )
 
 var DB *sql.DB
 
 func ConnectDatabase() error {
-	_ = godotenv.Load()
-
-	fmt.Println("Connecting to database...")
-
 	dsn := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/%s",
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
@@ -25,13 +23,21 @@ func ConnectDatabase() error {
 		os.Getenv("DB_NAME"),
 	)
 
+	log.Println("Using DSN:", dsn) // Debugging log
+
 	var err error
 	DB, err = sql.Open("pgx", dsn)
 	if err != nil {
-		fmt.Println("Failed to connect to database:", err)
-		return err
+		return fmt.Errorf("failed to open database: %v", err)
 	}
 
-	fmt.Println("Pinging database...")
-	return DB.Ping()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := DB.PingContext(ctx); err != nil {
+		return fmt.Errorf("database ping error: %v", err)
+	}
+
+	log.Println("Database connected successfully!")
+	return nil
 }

@@ -16,3 +16,12 @@ export const fetchData = async (): Promise<string[]> => {
     const result: DataEntry[] = await response.json();
     return result.map(entry => entry.content);
 };
+
+export const formatData = async (data: string[], formatType: 'standup' | 'time_entry' | 'weekly_update'): Promise<string> => {
+    const response = await fetch('/api/format', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data, formatType }),
+    });
+    return response.text();
+}
